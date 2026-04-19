@@ -244,6 +244,35 @@ export interface ConnectorsModule {
   ): Promise<ConnectorConnectionResponse>;
 
   /**
+   * Retrieves the OAuth access token and connection configuration for a **workspace-registered** connector
+   * (a connector backed by an OAuth app registered in the workspace, consented to once by the app builder).
+   *
+   * Use this overload when the app's backend function needs to use a connector identified by its
+   * workspace-connector ID rather than a platform integration type. The token returned represents
+   * the app builder's consent against the workspace's OAuth app and is shared across all app users
+   * of the app — identical semantics to the platform-shared `getConnection(integrationType)` form,
+   * differing only in which OAuth app was used to produce the token.
+   *
+   * @param opts - An object with `connectorId` — the ID of the workspace connector (the `OrganizationConnector` database ID) as surfaced in the builder chat context.
+   * @returns Promise resolving to a {@link ConnectorConnectionResponse} with `accessToken` and `connectionConfig`.
+   *
+   * @example
+   * ```typescript
+   * // Get the connection for a workspace-registered connector
+   * const { accessToken, connectionConfig } = await base44.asServiceRole.connectors.getConnection({
+   *   connectorId: 'abc123def',
+   * });
+   *
+   * const response = await fetch(`https://${connectionConfig?.subdomain}.snowflakecomputing.com/api/v2/statements`, {
+   *   headers: { Authorization: `Bearer ${accessToken}` },
+   * });
+   * ```
+   */
+  getConnection(
+    opts: { connectorId: string },
+  ): Promise<ConnectorConnectionResponse>;
+
+  /**
    * Retrieves an OAuth access token for an end user's connection to a specific connector.
    *
    * @deprecated Use {@link getCurrentAppUserConnection} instead.
